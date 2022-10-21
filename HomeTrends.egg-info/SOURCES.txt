@@ -4,4 +4,5 @@ HomeTrends.egg-info/SOURCES.txt
 HomeTrends.egg-info/dependency_links.txt
 HomeTrends.egg-info/requires.txt
 HomeTrends.egg-info/top_level.txt
+utils/ScrapeWebsite.py
 utils/__init__.py

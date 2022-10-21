@@ -5,5 +5,6 @@ setup(name='HomeTrends',
        packages=find_packages(),
        install_requires=[
         'selenium',
-        'webdriver-manager'
+        'webdriver-manager',
+        'ipykernel'
        ])
