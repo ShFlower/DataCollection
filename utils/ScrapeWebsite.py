@@ -4,6 +4,8 @@ import time
 #from typing import KeysView
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
+from fractions import *
 
 #from selenium.webdriver.support.ui import WebDriverWait
 #from selenium.webdriver.support import expected_conditions as EC
@@ -40,14 +42,40 @@ class ScrapeWebsite:
         accept_element_selection.click()
         time.sleep(1)
 
-    def accept_element_containing_text(self, element_with_text_xpath :str, find_string :str):
-        #selection = self.driver.find_elements(By.XPATH, element_with_text_xpath)
+    def accept_button_containing_text(self, element_with_text_xpath :str, element_text :str):
         found_elements=[]
-        found_elements = self.driver.find_elements(By.XPATH, "//button[text()='For Sale']")
-        #found_elements = self.driver.find_elements(By.XPATH, "//button[text()='{find_string}')
+        found_elements = self.driver.find_elements(By.XPATH, f"//button[text()='{element_text}']")
         print(f"found elements = {found_elements}")
         found_elements[0].click()
+        time.sleep(1)
+
+    def accept_form_containing_dropdown(self, element_with_dropdown_xpath :str, dropdown_selection :str):
+        #dropdown_element = self.driver.find_element (By.XPATH, ("//select[@name='radius']/option[text()='Within 20 miles']"))
+        #dropdown_element = self.driver.find_element (By.XPATH, (f"//select[@name='radius']/option[text()='{dropdown_selection}']"))
+        dropdown_element = self.driver.find_element (By.XPATH, ("//select[@name='radius']/option[text()='{fracstr}']"))
+        #dropdown_element = self.driver.find_element (By.XPATH, ("//select[@name='radius']/option[value()="0.25"]"))
+        print(f"dropdown_element = {dropdown_element}")
+        dropdown_element.click()
+
+    def accept_form_containing_dropdown_using_select(self, element_with_dropdown_xpath :str, dropdown_selection :str):  
+        selection=[] 
+        #selection= self.driver.find_elements(By.ID,id:('radius')).select
+        print("f selection = {selection}")
+        selection.select_by_value('0.25') #Pass value as string
         time.sleep(25)
+
+    def accept_form_containing_dropdown_byValue(self, element_id :str, dropdown_value :float):   
+        dropdown_list=[]
+        dropdown_list = self.driver.find_element(By.XPATH, (f"//select[@id='{element_id}']")).find_elements(By.TAG_NAME, 'option')
+        index=1
+        for option in dropdown_list:
+            if float(option.get_attribute("value")) == dropdown_value: 
+                dropdown_list[index].click()
+                index += 1
+               
+
+            
+
      
     #def validate_user_input(usr_search_input :str):
     #pass
