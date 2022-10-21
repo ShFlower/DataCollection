@@ -34,6 +34,7 @@ class ScrapeWebsite:
         else:
             node_xpath = (f"""//{tagname}[@{attribute}="{value}"]/{list_item}""")
         return(node_xpath)
+        time.sleep(2)
 
 
     def accept_element (self, user_selection_xpath :str):
@@ -60,23 +61,23 @@ class ScrapeWebsite:
     def accept_form_containing_dropdown_using_select(self, element_with_dropdown_xpath :str, dropdown_selection :str):  
         selection=[] 
         #selection= self.driver.find_elements(By.ID,id:('radius')).select
-        print("f selection = {selection}")
+        #print("f selection = {selection}")
         selection.select_by_value('0.25') #Pass value as string
-        time.sleep(25)
+        time.sleep(1)
 
-    def accept_form_containing_dropdown_byValue(self, element_id :str, dropdown_value :float):   
+    def accept_form_containing_dropdown(self, element_id :str, dropdown_value :str):   
         dropdown_list=[]
         dropdown_list = self.driver.find_element(By.XPATH, (f"//select[@id='{element_id}']")).find_elements(By.TAG_NAME, 'option')
         index=1
-        for option in dropdown_list:
-            if float(option.get_attribute("value")) == dropdown_value: 
+        for list_item in dropdown_list:
+            if list_item.get_attribute("value") == dropdown_value: 
+
                 dropdown_list[index].click()
                 index += 1
-               
+        time.sleep(1)           
 
-            
+        
 
-     
     #def validate_user_input(usr_search_input :str):
     #pass
 
