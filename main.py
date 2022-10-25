@@ -11,7 +11,8 @@ if __name__ == '__main__':
     cookies_xpath= bot.find_node_xpath(tagname = 'button', 
                                         attribute = 'class', 
                                         value = 'optanon-allow-all accept-cookies-button',
-                                        list_item ='')
+                                        list_item ='',
+                                        display_label='')
     print(cookies_xpath)                        
     bot.accept_element(cookies_xpath)
     
@@ -21,7 +22,8 @@ if __name__ == '__main__':
     location_searchbar_xpath = bot.find_node_xpath(tagname = 'input', 
                                                 attribute = 'class', 
                                                 value = 'ksc_inputText ksc_typeAheadInputField',
-                                                list_item='')
+                                                list_item='',
+                                                display_label='')
     # 2b. get the location entry specified by user
     location_user_input = bot.get_user_input()
     print(f"Location_user_input = {location_user_input}")
@@ -35,7 +37,8 @@ if __name__ == '__main__':
     location_suggested_list_xpath=bot.find_node_xpath(tagname = 'ul', 
                                                 attribute = 'class', 
                                                 value = 'ksc_resultsList',
-                                                list_item = 'li[1]') #accepts the first item in the suggested list
+                                                list_item = 'li[1]',
+                                                display_label='') #accepts the first item in the suggested list
     print(f"location suggested list xpath= {location_suggested_list_xpath}")
     bot.accept_element(location_suggested_list_xpath)
 
@@ -45,13 +48,17 @@ if __name__ == '__main__':
     forsale_xpath=bot.find_node_xpath (tagname = 'button', 
                                         attribute = 'class', 
                                         value = 'ksc_button large primary searchPanelControls',
-                                        list_item = '')                 
+                                        list_item = '',
+                                        display_label='')                 
     print(forsale_xpath)      
     bot.accept_button_containing_text(forsale_xpath, element_text = 'For Sale')
                            
 # On website page 2
-    #4a. Set the search radius for the location specified -     
-    bot.accept_form_containing_dropdown(element_id = 'radius',dropdown_value = '0.25') 
+    #4a. Set the search radius for the location specified  
+    bot.accept_form_containing_dropdown_using_select(element_with_dropdown_xpath='', dropdown_selection='0.25')
+    #bot.accept_form_containing_dropdown_frac(element_id = 'radius', dropdown_value = 'Within 1/2 mile')
+    #bot.accept_form_containing_dropdown(element_id = 'radius',dropdown_value = '0.25')
+    
 
     #4b. Set the min price for the properties searched   
     bot.accept_form_containing_dropdown(element_id = 'minPrice',dropdown_value = '50000') 
@@ -75,7 +82,21 @@ if __name__ == '__main__':
     findproperty_xpath= bot.find_node_xpath(tagname = 'button', 
                                         attribute = 'class', 
                                         value = 'button touchsearch-button touchsearch-primarybutton',
-                                        list_item ='')
+                                        list_item ='',
+                                        display_label='')
                       
     bot.accept_element(findproperty_xpath)
     
+# On website property listings page - Website page 3
+    filter_xpath = bot.find_node_xpath(tagname = 'div', 
+                                        attribute = 'class', 
+                                        value = 'filtersBar-moreText',
+                                        list_item ='',
+                                        display_label='')
+    bot.accept_element(filter_xpath)
+#On filter dropdown page select the following options
+    '''filter_xpath = bot.find_node_xpath(tagname = 'div', 
+                                        attribute = 'class', 
+                                        value = 'propertyType-label',
+                                        list_item ='',
+                                        display_label='')'''
