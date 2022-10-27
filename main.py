@@ -2,7 +2,7 @@ from  utils.ScrapeWebsite import ScrapeWebsite
 
 if __name__ == '__main__':
     #On RightMove website
-    bot = ScrapeWebsite(site_url = 'https://www.rightmove.co.uk/')
+   ''' bot = ScrapeWebsite(site_url = 'https://www.rightmove.co.uk/')
 
     #On Website page 1:
     # 1a. find cookie button and click accept cookies
@@ -56,27 +56,37 @@ if __name__ == '__main__':
 # https://www.rightmove.co.uk/property-for-sale/search.html?searchLocation=NW%20(Postcode%20Area)&useLocationIdentifier=true&locationIdentifier=REGION%5E93961&buy=For+sale
     
     #2a. Set the search radius for the location specified  
-    bot.set_dropdown_using_select_ByID(element_attribute='By.ID', element_value='radius', dropdown_selection='0.25')
-    #works bot.set_dropdown_from_LoV(element_id = 'radius',dropdown_value = '0.25')
+    #bot.set_dropdown_using_select_ByID(element_attribute='By.ID', element_value='radius', dropdown_selection='0.25')
+    bot.set_dropdown_using_select_option(element_attribute='name', 
+                                        element_name ='radius', 
+                                        dropdown_string = 'Within 1/2 mile')
+    #works bot.set_dropdown_from_LoV(element_value = 'radius',dropdown_value = '0.25')
     
 
     #2b. Set the min price for the properties searched   
-    bot.set_dropdown_from_LoV(element_id = 'minPrice',dropdown_value = '50000') 
+    bot.set_dropdown_from_LoV_byID(element_value = 'minPrice',dropdown_value = '50000') 
 
     #2c. Set the max price for the properties searched   
-    bot.set_dropdown_from_LoV(element_id = 'maxPrice',dropdown_value = '1000000')  
+    bot.set_dropdown_from_LoV_byID(element_value = 'maxPrice',dropdown_value = '1000000')  
     
     #2d. Set the min bedrooms for the properties searched   
-    bot.set_dropdown_from_LoV(element_id = 'minBedrooms',dropdown_value = '1')  
+    bot.set_dropdown_from_LoV_byID(element_value = 'minBedrooms',dropdown_value = '1')  
 
     #2e. Set the max bedrooms for the properties searched   
-    bot.set_dropdown_from_LoV(element_id = 'maxBedrooms',dropdown_value = '3')  
+    bot.set_dropdown_from_LoV_byID(element_value = 'maxBedrooms',dropdown_value = '3')  
 
     #2f. Set the max bedrooms for the properties searched   
-    bot.set_dropdown_from_LoV(element_id = 'displayPropertyType',dropdown_value = 'houses')
+    bot.set_dropdown_from_LoV_byID(element_value = 'displayPropertyType',dropdown_value = 'houses')
 
     #2g. Set the max bedrooms for the properties searched   
-    bot.set_dropdown_from_LoV(element_id = 'maxDaysSinceAdded',dropdown_value = '7') 
+    bot.set_dropdown_from_LoV_byID(element_value = 'maxDaysSinceAdded',dropdown_value = '7') 
+    
+    #2h. Set the include sold and STC to ON or OFF. ON includes sold and STC in listings
+    bot.accept_element_using_contains(tagname='span',
+                                        element_attribute='class',
+                                        element_value  = 'tickbox--indicator',
+                                        required_value = 'Off')#set this to on or off
+    
     
     #2h. Select the find property button
     findproperty_xpath= bot.find_tag_xpath(tagname = 'button', 
@@ -120,3 +130,29 @@ if __name__ == '__main__':
                                     display_label='')
     print(done_xpath)
     bot.accept_element(done_xpath)
+    
+    bot.sleep(2)'''
+
+    # On website property listings returned page after filters are applied - Website page 4
+    
+    
+#https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E93961&maxBedrooms=3&minBedrooms=1&maxPrice=1000000&minPrice=50000&radius=0.25&propertyTypes=detached%2Csemi-detached%2Cterraced&maxDaysSinceAdded=7&includeSSTC=false&mustHave=garden%2Cparking&dontShow=retirement%2CsharedOwnership&furnishTypes=&keywords=
+bot4 = ScrapeWebsite(site_url = 'https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E93961&maxBedrooms=3&minBedrooms=1&maxPrice=1000000&minPrice=50000&radius=0.25&propertyTypes=detached%2Csemi-detached%2Cterraced&maxDaysSinceAdded=7&includeSSTC=false&mustHave=garden%2Cparking&dontShow=retirement%2CsharedOwnership&furnishTypes=&keywords=')
+
+# 1a. find cookie button and click accept cookies
+'''cookies_xpath= bot4.find_tag_xpath(tagname = 'button', 
+                                tag_attribute = 'class', 
+                                tag_value = 'optanon-allow-all accept-cookies-button',
+                                list_item ='',
+                                display_label='')
+print(cookies_xpath)                       
+bot4.accept_element(cookies_xpath)''' 
+
+#4a. define the listing order required - (2)Highest Price,(1)Lowest Price, (6)Newest Listed, (10)Oldest Listed
+#works bot4.set_dropdown_from_LoV_byID(element_value ='sortType', dropdown_value = '6')
+#works bot4.set_dropdown_using_select_ByID( element_attribute = 'ID', element_value ='sortType', dropdown_selection ='1')
+bot4.set_dropdown_using_select_option(element_attribute='ID', 
+                                    element_name ='sortType', 
+                                    dropdown_string = 'Lowest Price')
+
+bot4.sleep(500)

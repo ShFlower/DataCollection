@@ -28,6 +28,9 @@ class ScrapeWebsite:
         self.driver.get(site_url)
         time.sleep(2)
 
+    def sleep(self, sleeptime :int):
+        time.sleep(sleeptime)
+
     #specify the xpath syntax given tagname,attribute and vlaue of web element or the specified list item    
     def find_tag_xpath(self, tagname :str, tag_attribute :str, tag_value :str, list_item :str, display_label :str):
              
@@ -79,6 +82,19 @@ class ScrapeWebsite:
             if element.text in filter_elements_required :
                 element.click()
         time.sleep(1)
+
+    def accept_element_using_contains(self, 
+                                    tagname : str,
+                                    element_attribute :str, 
+                                    element_value :str,
+                                    required_value : str):
+    
+        find_element_arg = '//'+tagname+'[contains(@' + element_attribute+',' + "'"+element_value + "'"+ ')]'
+        accept_element = self.driver.find_element(By.XPATH, find_element_arg)
+        print(accept_element)
+        if required_value.lower() == 'on' :
+            accept_element.click()
+        time.sleep(3)
         
         #Other tries that did not work
         #works filter_elements = self.driver.find_elements(By.XPATH, "//div[@data-test='garden-mustHave']")
@@ -99,10 +115,8 @@ class ScrapeWebsite:
         if isinstance(req_dropdown_element_index, int) :
             found_elements[req_dropdown_element_index].click()
         time.sleep(1)
-      
-    def set_dropdown_using_unicode_for_fraction(self, element_id :str, dropdown_value :str):
-        #dropdown_element = self.driver.find_element (By.XPATH, ("//select[@name='radius']/option[text()='Within 20 miles']"))
-        #dropdown_element = self.driver.find_element (By.XPATH, (f"//select[@name='radius']/option[text()='{dropdown_selection}']"))
+
+    def check_for_fractions_in_string(self,dropdown_value :str):
         special_characters = "/"
         if any(c in special_characters for c in dropdown_value):
             char_position = dropdown_value.find("/")
@@ -110,14 +124,26 @@ class ScrapeWebsite:
                 dropdown_value = str("Within "+ u"\u00bc" +" mile")
             if (dropdown_value[char_position-1] == '1' and dropdown_value[char_position + 1] == '2'): 
                 dropdown_value = 'Within '+ u"\u00bd" +' mile'
-            print(f"dropdown_unicode = {dropdown_value}")
-        dropdown_element = self.driver.find_element (By.XPATH, (f"//select[@name='radius']/option[text()='{dropdown_value}']"))
+            print(f"dropdown_unicode = {dropdown_value}") 
+        return(dropdown_value)
+
+    def set_dropdown_using_select_option(self, element_attribute :str, element_name :str, dropdown_string :str):
+        #dropdown_element = self.driver.find_element (By.XPATH, ("//select[@name='radius']/option[text()='Within 20 miles']"))
+        #dropdown_element = self.driver.find_element (By.XPATH, (f"//select[@name='radius']/option[text()='{dropdown_selection}']"))
+        #works dropdown_element = self.driver.find_element (By.XPATH, (f"//select[@name='radius']/option[text()='{dropdown_value}']"))
+        
+        dropdown_string= self.check_for_fractions_in_string(dropdown_value = dropdown_string)
+        
+        find_element_arg = '(//select[@'+ element_attribute + '=' + "'" + element_name + "'"  + ']/option[text()=' + "'" + dropdown_string + "'" +'])'
+        print(find_element_arg)
+        dropdown_element = self.driver.find_element (By.XPATH,find_element_arg)
         dropdown_element.click()
-        time.sleep(15)
+        time.sleep(1)
 
     def set_dropdown_using_select_ByID(self, element_attribute :str, element_value :str, dropdown_selection :str):  
         selection=[] 
         selection = Select(self.driver.find_element(By.ID,element_value))
+        print(selection)
         selection.select_by_value(dropdown_selection) #Pass string argument 
         time.sleep(1)
 
@@ -127,16 +153,19 @@ class ScrapeWebsite:
         time.sleep(1)
 
 
-    def set_dropdown_from_LoV(self, element_id :str, dropdown_value :str):   
+    def set_dropdown_from_LoV_byID(self, element_value :str, dropdown_value :str):   
         index=0
         dropdown_list=[]
-        dropdown_list = self.driver.find_element(By.XPATH, (f"//select[@id='{element_id}']")).find_elements(By.TAG_NAME, 'option')
+        dropdown_list = self.driver.find_element(By.XPATH, (f"//select[@id='{element_value}']")).find_elements(By.TAG_NAME, 'option')
+        print(f"dropdown_list={dropdown_list}")
         for list_item in dropdown_list:
+            print(list_item.get_attribute("value"))
             if list_item.get_attribute("value") == dropdown_value: 
                 dropdown_list[index].click()
             index += 1
-        time.sleep(1)           
+        time.sleep(2)           
 
+           
   
     def get_user_input(self):
         valid_input_flag = 0
