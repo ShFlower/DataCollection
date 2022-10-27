@@ -47,20 +47,69 @@ class ScrapeWebsite:
         accept_element_selection.click()
         time.sleep(1)
 
-    def accept_element_by_name (self, user_selection_xpath :str):
+    def find_filter_elements_using_span(self, tagname :str, attribute :str, value :str, filter_labels :list):
+        #this does not differentiate between the must have and dont show lists which all get picked up together here
+        filter_elements=[]  
+        #in Main method call :bot.find_filter_elements_using_span(element_class = 'multiSelect-label', element_label = 'Garden')
+        find_element_arg = '//'+tagname+'[contains(@' + attribute+',' + "'"+value + "'"+ ')]/span'
+        #//div[contains(@class,'multiSelect-label']/span
+        #print(find_element_arg)
+        filter_elements = self.driver.find_elements(By.XPATH,find_element_arg) 
+        for element in filter_elements:
+            #print(element.text)
+            if element.text in filter_labels:
+                print(element.text)
+                element.click()
+        time.sleep(5)
+
+    def find_filter_elements_using_linktext(self, tagname :str, tag_attribute :str, tag_attribute_value :str, object_attribute :str, object_attribute_value :str):
+        filter_elements=[]  
+        print(object_attribute_value)
+        find_element_arg = '//'+tagname+'[contains(@' + object_attribute+',' + "'"+object_attribute_value + "'"+ ')]'
+        #"'//'+tagname+'[contains(@' + object_attribute+',' + "'"+object_attribute_value + "'"+ ')]'"
+        #find_element_arg = '//'+tagname+'[contains(@' + object_attribute+',' + "'"+object_attribute_value+ "'"+ ')]'
+        print(find_element_arg)
+        filter_elements = self.driver.find_elements(By.XPATH, find_element_arg)
+        
+        
+        #works filter_elements = self.driver.find_elements(By.XPATH,"//div[contains(@data-test,'mustHave')]")
+        #works filter_elements = self.driver.find_elements(By.XPATH, "//div[@data-test='garden-mustHave']")
+        #filter_elements = self.driver.find_elements(By.cssSelector, "div[class='multiSelect-option multiSelect-option--selected'] [data-test='garden-mustHave']")
+        #filter_elements.select_by_value(dropdown_selection) #Pass string argument 
+        #filter_elements=self.driver.find_element(By.PARTIAL_LINK_TEXT, filter_labels)  
+        print(filter_elements)
+        for element in filter_elements:
+            print(element.text)
+        time.sleep(1)
+        
+        
+
+
+    def accept_element_by_name (self, element_label :str):
         # find the xpath element first       
-        accept_element_selection = self.driver.find_element(By.XPATH, user_selection_xpath)
+        accept_element_selection = self.driver.find_element(By.NAME, element_label)
         accept_element_selection.click()
         time.sleep(1)
 
-    def accept_button_containing_text(self, element_with_text_xpath :str, element_text :str):
+    def accept_element_containing_text(self, element_type :str, element_text :str, req_dropdown_element_index :int):
         found_elements=[]
-        found_elements = self.driver.find_elements(By.XPATH, f"//button[text()='{element_text}']")
-        #print(f"found elements = {found_elements}")
-        found_elements[0].click()
+        found_elements = self.driver.find_elements(By.XPATH, f"//{element_type}[text()='{element_text}']")
+        print(f"found elements = {found_elements}")
+        if isinstance(req_dropdown_element_index, int) :
+            found_elements[req_dropdown_element_index].click()
         time.sleep(1)
+      
+    #//*[@data-tb-test-id="DownloadCrosstab-Button"]  
+    
+    '''def accept_element_containing_data_test(self, element_type :str, element_text :str, req_dropdown_element_index :int):
+        #found_elements=[]
+        found_elements = self.driver.find_element(By.XPATH, //*[@data-test="garden-mustHave"])
+        print(f"found elements = {found_elements}")
+        if isinstance(req_dropdown_element_index, int) :
+            found_elements[req_dropdown_element_index].click()
+        time.sleep(1)'''
 
-    def accept_form_containing_dropdown_frac(self, element_id :str, dropdown_value :str):
+    def set_dropdown_using_unicode_for_fraction(self, element_id :str, dropdown_value :str):
         #dropdown_element = self.driver.find_element (By.XPATH, ("//select[@name='radius']/option[text()='Within 20 miles']"))
         #dropdown_element = self.driver.find_element (By.XPATH, (f"//select[@name='radius']/option[text()='{dropdown_selection}']"))
         special_characters = "/"
@@ -75,14 +124,19 @@ class ScrapeWebsite:
         dropdown_element.click()
         time.sleep(15)
 
-    def accept_form_containing_dropdown_using_select(self, element_with_dropdown_xpath :str, dropdown_selection :str):  
+    def set_dropdown_using_select_ByID(self, element_attribute :str, element_label :str, dropdown_selection :str):  
         selection=[] 
-        selection = Select(self.driver.find_element(By.ID,'radius'))
-        print(f"selection = {selection}")
-        selection.select_by_value(dropdown_selection) #Pass integer 
+        selection = Select(self.driver.find_element(By.ID,element_label))
+        selection.select_by_value(dropdown_selection) #Pass string argument 
         time.sleep(1)
 
-    def accept_form_containing_dropdown(self, element_id :str, dropdown_value :str):   
+    def set_dropdown_using_select_ByNAME(self, element_label :str):  
+        selection = Select(self.driver.find_element(By.NAME,element_label))
+        selection.select_by_value(dropdown_selection) #Pass string argument 
+        time.sleep(1)
+
+
+    def set_dropdown_from_LoV(self, element_id :str, dropdown_value :str):   
         index=0
         dropdown_list=[]
         dropdown_list = self.driver.find_element(By.XPATH, (f"//select[@id='{element_id}']")).find_elements(By.TAG_NAME, 'option')
