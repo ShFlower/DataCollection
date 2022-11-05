@@ -108,37 +108,36 @@ class ScrapeWebsite:
            return(False)
 
 
-    def test_if_element_containing_textstring_exists_higher(self, tagname :str, element_attribute :str, element_name :str, text_string :str):
+    def test_if_element_containing_textstring_exists_higher(self, tagname :str, element_attribute :str, element_name :str, display_label :str):
         
-        pagination_button = self.find_tag_xpath(tagname='div', 
-                                tag_attribute='class', 
-                                tag_value='pagination-controls', 
+        pagination_button = self.find_tag_xpath(tagname=tagname, 
+                                tag_attribute=element_attribute, 
+                                tag_value=element_name, 
                                 list_item='', 
                                 display_label='')
-        pagination_button2 = pagination_button + "/button/span[contains(text(),'Next')]"
-        print(pagination_button2)
-        pagis_found=[]
-        elements_found=[]
+        #pagination_button2 = pagination_button + "/button/span[contains(text(),'Next')]"
+        print(pagination_button)
+        active_page_controls=[]
+       
 
         try:
-            pagis_found = self.driver.find_elements(By.XPATH, pagination_button)
-            for pagi in pagis_found:
-                print(f"pagi_found text = {pagi.text}")
-            elements_found= self.driver.find_elements(By.XPATH,pagination_button2)
-            for element in elements_found:
-                print(f"element_text = {element.text}")
-                if element.is_enabled:
-                    element.click()
-                    return(True)
-                else:
-                    return(False)
+            active_page_controls = self.driver.find_elements(By.XPATH, pagination_button)
+            if(len(active_page_controls) == 1 and active_page_controls[0].text != display_label):
+                    return(False) 
+            else:
+                for page_control in active_page_controls:
+                    print(f"page_control = {page_control.text}")
+                    if page_control.text == display_label:
+                        page_control.click()
+                        return(True)
+             
         except NoSuchElementException: 
-           print('No elements found')
-           return(False)
+            print('No elements found')
+    
         
            
  
-    def find_elements_in_container(self, container_xpath :str, element_path : str):
+    def find_elements_in_container(self, container_xpath :str, child_tag : str):
         elements_in_search_results=[]
         elements_list=[]
         not_last_page = True
@@ -146,25 +145,18 @@ class ScrapeWebsite:
         #print(property_search_results.text)
         while (not_last_page == True):
             scroll_website(self)
-            elements_in_search_results = property_search_results.find_elements(By.XPATH, element_path) 
+            elements_in_search_results = property_search_results.find_elements(By.XPATH, child_tag) 
             print(len(elements_in_search_results))
             for element in elements_in_search_results:  
                 elements_list.append(element)
-            not_last_page = self.test_if_element_containing_textstring_exists(tagname = 'button',
-                                                                            element_attribute = 'class',
-                                                                            element_name= 'pagination-button pagination-direction pagination-direction--next',
-                                                                            text_string = 'disabled')
 
-            '''not_last_page = self.test_if_element_containing_textstring_exists_higher(tagname = 'div', 
+            #check for multiple search pages and pagination controls to collate all search results
+            not_last_page = self.test_if_element_containing_textstring_exists_higher(tagname = 'div', 
                                                                                     element_attribute ='class', 
                                                                                     element_name ='pagination-controls', 
-                                                                                    text_string ='disable')'''
+                                                                                    display_label ='Next')
 
-            if not_last_page == False:
-                self.accept_element_using_span(self, tagname='button', 
-                                                     attribute= 'class',
-                                                     value = 'pagination-button pagination-direction pagination-direction--next')
-            
+           
     #works filter_elements = self.driver.find_elements(By.XPATH,"//div[contains(@data-test,'mustHave')]")
     #works filter_elements = self.driver.find_elements(By.XPATH, "//div[@data-test='garden-mustHave']")
     def find_filter_elements_using_contains(self, 

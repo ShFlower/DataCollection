@@ -162,7 +162,7 @@ bot4.set_dropdown_using_select_option(element_attribute='ID',
                                 list_item='', 
                                 display_label='')'''
 # finds all search listings on page 1 of results
-bot4.find_elements_in_container(container_xpath = '//*[@id="l-searchResults"]/div', element_path='./div')
+bot4.find_elements_in_container(container_xpath = '//*[@id="l-searchResults"]/div', child_tag='./div')
 #//div[@class="l-searchResults/div"]./div
 
 bot4.sleep(500)
