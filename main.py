@@ -1,5 +1,6 @@
 from  utils.ScrapeWebsite import ScrapeWebsite
 
+
 if __name__ == '__main__':
     #On RightMove website
    ''' bot = ScrapeWebsite(site_url = 'https://www.rightmove.co.uk/')
@@ -130,11 +131,10 @@ if __name__ == '__main__':
                                     display_label='')
     print(done_xpath)
     bot.accept_element(done_xpath)
-    
     bot.sleep(2)'''
 
-    # On website property listings returned page after filters are applied - Website page 4
-    
+# On website property listings returned page after filters are applied - Website page 4
+  
     
 #https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E93961&maxBedrooms=3&minBedrooms=1&maxPrice=1000000&minPrice=50000&radius=0.25&propertyTypes=detached%2Csemi-detached%2Cterraced&maxDaysSinceAdded=7&includeSSTC=false&mustHave=garden%2Cparking&dontShow=retirement%2CsharedOwnership&furnishTypes=&keywords=
 bot4 = ScrapeWebsite(site_url = 'https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E93961&maxBedrooms=3&minBedrooms=1&maxPrice=1000000&minPrice=50000&radius=0.25&propertyTypes=detached%2Csemi-detached%2Cterraced&maxDaysSinceAdded=7&includeSSTC=false&mustHave=garden%2Cparking&dontShow=retirement%2CsharedOwnership&furnishTypes=&keywords=')
@@ -155,4 +155,15 @@ bot4.set_dropdown_using_select_option(element_attribute='ID',
                                     element_name ='sortType', 
                                     dropdown_string = 'Lowest Price')
 
+#4b. identify the property  list returned against the search specification
+'''property_list= bot4.find_tag_xpath(tagname='div', 
+                                tag_attribute='class', 
+                                tag_value='l-searchResults/div', 
+                                list_item='', 
+                                display_label='')'''
+# finds all search listings on page 1 of results
+bot4.find_elements_in_container(container_xpath = '//*[@id="l-searchResults"]/div', element_path='./div')
+#//div[@class="l-searchResults/div"]./div
+
 bot4.sleep(500)
+

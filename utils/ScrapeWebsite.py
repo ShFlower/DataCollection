@@ -6,7 +6,10 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from fractions import *
+from selenium.common.exceptions import NoSuchElementException
 
+#custom methods or libraries
+from utils.infinite_scroll import scroll_website
 
 #from selenium.webdriver.support.ui import WebDriverWait
 #from selenium.webdriver.support import expected_conditions as EC
@@ -31,7 +34,8 @@ class ScrapeWebsite:
     def sleep(self, sleeptime :int):
         time.sleep(sleeptime)
 
-    #specify the xpath syntax given tagname,attribute and vlaue of web element or the specified list item    
+    #specify the xpath syntax given tagname,attribute and vlaue of web element
+    # if using this method to deine a list item, then enter the list_item number e.g li[1]
     def find_tag_xpath(self, tagname :str, tag_attribute :str, tag_value :str, list_item :str, display_label :str):
              
         if len(list_item) > 0:
@@ -50,22 +54,117 @@ class ScrapeWebsite:
         accept_element_selection.click()
         time.sleep(1)
 
-    def find_filter_elements_using_span(self, tagname :str, attribute :str, value :str, filter_labels :list):
-        #this does not differentiate between the must have and dont show lists which all get picked up together here
-        filter_elements=[]  
-        #in Main method call :bot.find_filter_elements_using_span(element_class = 'multiSelect-label', element_label = 'Garden')
-        find_element_arg = '//'+tagname+'[contains(@' + attribute+',' + "'"+value + "'"+ ')]/span'
-        #//div[contains(@class,'multiSelect-label']/span
-        #print(find_element_arg)
-        filter_elements = self.driver.find_elements(By.XPATH,find_element_arg) 
-        for element in filter_elements:
+    def select_element_from_list_of_elements (self, list_of_elements :str, select_criteria :list):
+        for element in list_of_elements:
             #print(element.text)
-            if element.text in filter_labels:
+            if element.text in select_criteria:
                 print(element.text)
                 element.click()
         time.sleep(5)
-    
 
+    def find_list_of_elements_using_span(self, tagname :str, attribute :str, value :str):
+        #this does not differentiate between the must have and dont show lists which all get picked up together here
+        list_of_elements=[]  
+        #in Main method call :bot.find_filter_elements_using_span(element_class = 'multiSelect-label', element_label = 'Garden')
+        find_element_arg = '//'+tagname+'[contains(@' + attribute+',' + "'"+value + "'"+ ')]/span'
+        #//div[contains(@class,'multiSelect-label']/span
+        print(find_element_arg)
+        list_of_elements = self.driver.find_elements(By.XPATH,find_element_arg) 
+        return(list_of_elements)
+
+    def accept_element_using_span(self, tagname :str, attribute :str, value :str):
+        find_element_arg = '//'+tagname+'[contains(@' + attribute+',' + "'"+value + "'"+ ')]/span'
+        print(find_element_arg)
+        next_button=self.driver.find_elements(By.XPATH,find_element_arg) 
+        print(next_button)   
+
+
+    def test_if_element_containing_textstring_exists(self, tagname :str, element_attribute :str, element_name :str, text_string :str):
+        #find_element_arg = '(//select[@'+ element_attribute + '=' + "'" + element_name + "'"  + ']/option[text()=' + "'" + text_string + "'" +'])'
+        #print(find_element_arg)
+
+        #test_element=self.driver.find_element (By.XPATH,"//select[@class='pagination-button pagination-direction pagination-direction--next']/option[text()=' disabled']")
+        pagination_button = self.find_tag_xpath(tagname='button', 
+                                tag_attribute='title', 
+                                tag_value='Next page', 
+                                list_item='', 
+                                display_label='')
+        pagination_button2 = pagination_button + '/span'
+        print(pagination_button2)
+
+        #Attempt 1 : pagination_button = //button[@title="Next page"]/span  
+        #Attempt 2 : pagination_button = //button[@title="Next page"] 
+        try: 
+            element_found=self.driver.find_element(By.XPATH,pagination_button)
+            text_found= self.driver.find_element(By.XPATH, pagination_button2)
+            print(element_found.text)
+            if element_found.is_enabled:
+                element_found.click()
+                return(True)
+            else:
+                return(False)
+        except NoSuchElementException: 
+           print('No elements found')
+           return(False)
+
+
+    def test_if_element_containing_textstring_exists_higher(self, tagname :str, element_attribute :str, element_name :str, text_string :str):
+        
+        pagination_button = self.find_tag_xpath(tagname='div', 
+                                tag_attribute='class', 
+                                tag_value='pagination-controls', 
+                                list_item='', 
+                                display_label='')
+        pagination_button2 = pagination_button + "/button/span[contains(text(),'Next')]"
+        print(pagination_button2)
+        pagis_found=[]
+        elements_found=[]
+
+        try:
+            pagis_found = self.driver.find_elements(By.XPATH, pagination_button)
+            for pagi in pagis_found:
+                print(f"pagi_found text = {pagi.text}")
+            elements_found= self.driver.find_elements(By.XPATH,pagination_button2)
+            for element in elements_found:
+                print(f"element_text = {element.text}")
+                if element.is_enabled:
+                    element.click()
+                    return(True)
+                else:
+                    return(False)
+        except NoSuchElementException: 
+           print('No elements found')
+           return(False)
+        
+           
+ 
+    def find_elements_in_container(self, container_xpath :str, element_path : str):
+        elements_in_search_results=[]
+        elements_list=[]
+        not_last_page = True
+        property_search_results = self.driver.find_element(By.XPATH, container_xpath)
+        #print(property_search_results.text)
+        while (not_last_page == True):
+            scroll_website(self)
+            elements_in_search_results = property_search_results.find_elements(By.XPATH, element_path) 
+            print(len(elements_in_search_results))
+            for element in elements_in_search_results:  
+                elements_list.append(element)
+            not_last_page = self.test_if_element_containing_textstring_exists(tagname = 'button',
+                                                                            element_attribute = 'class',
+                                                                            element_name= 'pagination-button pagination-direction pagination-direction--next',
+                                                                            text_string = 'disabled')
+
+            '''not_last_page = self.test_if_element_containing_textstring_exists_higher(tagname = 'div', 
+                                                                                    element_attribute ='class', 
+                                                                                    element_name ='pagination-controls', 
+                                                                                    text_string ='disable')'''
+
+            if not_last_page == False:
+                self.accept_element_using_span(self, tagname='button', 
+                                                     attribute= 'class',
+                                                     value = 'pagination-button pagination-direction pagination-direction--next')
+            
     #works filter_elements = self.driver.find_elements(By.XPATH,"//div[contains(@data-test,'mustHave')]")
     #works filter_elements = self.driver.find_elements(By.XPATH, "//div[@data-test='garden-mustHave']")
     def find_filter_elements_using_contains(self, 
@@ -104,7 +203,7 @@ class ScrapeWebsite:
         
     
     def accept_element_by_name (self, element_value :str):
-        # find the xpath element first       
+        # find the xpath of an element using the element name.      
         accept_element_selection = self.driver.find_element(By.NAME, element_value).click()
         time.sleep(1)
 
@@ -165,8 +264,6 @@ class ScrapeWebsite:
             index += 1
         time.sleep(2)           
 
-           
-  
     def get_user_input(self):
         valid_input_flag = 0
         while valid_input_flag == 0:
