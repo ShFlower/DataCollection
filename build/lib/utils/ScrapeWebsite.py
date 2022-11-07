@@ -143,11 +143,8 @@ class ScrapeWebsite:
                                         page_control_element_attribute :str, 
                                         page_control_element_name :str, 
                                         page_control_label :str):
-        search_results=[] # all elements returned by search
-        property_details=[] # list of properties returned in search
-
-        property_info ={} #defines dictionary
-        list_of_property_info=[] #defines list of dictionary
+        search_results=[]
+        property_details=[]
         not_last_page = True
         property_search_results = self.driver.find_element(By.XPATH, search_container_xpath)
         #print(property_search_results.text)
@@ -159,22 +156,21 @@ class ScrapeWebsite:
             # add all elements on the page to search element list
             search_results = property_search_results.find_elements(By.XPATH, search_container_child_tag) 
             print(len(search_results))
-            
+            link_content=[]
             for result in search_results: 
                 #print(f" result = {result.text}") 
                 try: 
-                    #to exclude div items relating to banners
-                    result_item = result.find_element(By.XPATH, './div/a').get_attribute('id')
-                    #link = result.find_element(By.XPATH, './div')
+                    #link = result.find_element(By.XPATH, './div/a').get_attribute('id')
+                    link = result.find_element(By.XPATH, './div')
                     #link_content=link.text.split()
                     #link_content = nltk.word_tokenize(link.text)
-                    print(f"result_item = {result_item}")
-                    property_info['property_id'] = result_item
-                    list_of_property_info.append(property_info)
-                    property_details.append(result)
+                    print(f"link = {link.text}")
+                    for item in link_content:
+                        print(item.text)
+                    property_details.append(link)
 
                 except NoSuchElementException:
-                    print(f"Did not find element : result is {result}")
+                    print(f"Did not find element : result is {link}")
                 
             #check for multiple search pages and pagination controls to collate all search results
             not_last_page = self.scroll_results_pages(tagname = page_control_tagname, 
@@ -183,7 +179,6 @@ class ScrapeWebsite:
                                                                 control_label =page_control_label)
         print(f"No of search elements = {len(property_details)}")
         print(*property_details)
-        print(*list_of_property_info)
            
     #works filter_elements = self.driver.find_elements(By.XPATH,"//div[contains(@data-test,'mustHave')]")
     #works filter_elements = self.driver.find_elements(By.XPATH, "//div[@data-test='garden-mustHave']")

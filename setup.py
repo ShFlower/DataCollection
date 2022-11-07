@@ -7,5 +7,7 @@ setup(name='HomeTrends',
         'selenium',
         'webdriver-manager',
         'ipykernel',
+        'pandas',
+        'nltk',
         'Fraction'
        ])

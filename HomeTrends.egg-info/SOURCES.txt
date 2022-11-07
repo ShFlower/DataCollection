@@ -6,3 +6,4 @@ HomeTrends.egg-info/requires.txt
 HomeTrends.egg-info/top_level.txt
 utils/ScrapeWebsite.py
 utils/__init__.py
+utils/infinite_scroll.py

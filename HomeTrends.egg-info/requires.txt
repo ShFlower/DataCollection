@@ -1,4 +1,6 @@
 selenium
 webdriver-manager
 ipykernel
+pandas
+nltk
 Fraction
