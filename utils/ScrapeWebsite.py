@@ -82,35 +82,6 @@ class ScrapeWebsite:
         print(next_button)   
 
 
-    def test_if_element_containing_textstring_exists(self, tagname :str, element_attribute :str, element_name :str, text_string :str):
-        #find_element_arg = '(//select[@'+ element_attribute + '=' + "'" + element_name + "'"  + ']/option[text()=' + "'" + text_string + "'" +'])'
-        #print(find_element_arg)
-
-        #test_element=self.driver.find_element (By.XPATH,"//select[@class='pagination-button pagination-direction pagination-direction--next']/option[text()=' disabled']")
-        pagination_button = self.find_tag_xpath(tagname='button', 
-                                tag_attribute='title', 
-                                tag_value='Next page', 
-                                list_item='', 
-                                display_label='')
-        pagination_button2 = pagination_button + '/span'
-        print(pagination_button2)
-
-        #Attempt 1 : pagination_button = //button[@title="Next page"]/span  
-        #Attempt 2 : pagination_button = //button[@title="Next page"] 
-        try: 
-            element_found=self.driver.find_element(By.XPATH,pagination_button)
-            text_found= self.driver.find_element(By.XPATH, pagination_button2)
-            print(element_found.text)
-            if element_found.is_enabled:
-                element_found.click()
-                return(True)
-            else:
-                return(False)
-        except NoSuchElementException: 
-           print('No elements found')
-           return(False)
-
-
     def scroll_results_pages(self, tagname :str, element_attribute :str, element_name :str, control_label :str):
         
         pagination_button = self.find_tag_xpath(tagname=tagname, 
@@ -134,8 +105,25 @@ class ScrapeWebsite:
         except NoSuchElementException: 
             print('No elements found')
             
-           
- 
+    def check_tag_is_valid_search_item(self,result_xpath :str, test_string :str):
+        #check if div tags relate to banners
+        try: 
+            result_xpath.test_string 
+            return(True)
+        except NoSuchElementException:
+            print(f"Did not find element : result is {result_xpath.test_string}")  
+            return(False)
+
+    def find_element_xpath_using_contains(self, 
+                                        tagname : str,
+                                        tag_attribute :str, 
+                                        tag_value :str,
+                                        required_value : str):
+        
+            find_element_arg = '//'+tagname+'[contains(@' + tag_attribute+',' + "'"+tag_value + "'"+ ')]'
+            found_element = self.driver.find_element(By.XPATH, find_element_arg)
+            print(found_element)
+
     def find_elements_in_search_listing(self, 
                                         search_container_xpath :str, 
                                         search_container_child_tag : str,
@@ -161,29 +149,26 @@ class ScrapeWebsite:
             print(len(search_results))
             
             for result in search_results: 
-                #print(f" result = {result.text}") 
+                #print(f"result = {result.text}") 
                 try: 
-                    #to exclude div items relating to banners
-                    result_item = result.find_element(By.XPATH, './div/a').get_attribute('id')
-                    #link = result.find_element(By.XPATH, './div')
-                    #link_content=link.text.split()
-                    #link_content = nltk.word_tokenize(link.text)
-                    print(f"result_item = {result_item}")
-                    property_info['property_id'] = result_item
-                    list_of_property_info.append(property_info)
-                    property_details.append(result)
-
+                   result_item = result.find_element(By.XPATH, './div')
+                   property_details.append(result_item)
+                   result_item.click()
+                   #property_streetadd = result_item.find_element(By.XPATH,'./h1').text
+                   #print(property_streetadd)
                 except NoSuchElementException:
-                    print(f"Did not find element : result is {result}")
-                
+                    print(f"Did not find element : result is {result.text}")
+                 
             #check for multiple search pages and pagination controls to collate all search results
             not_last_page = self.scroll_results_pages(tagname = page_control_tagname, 
                                                                 element_attribute = page_control_element_attribute, 
                                                                 element_name = page_control_element_name, 
                                                                 control_label =page_control_label)
+      
         print(f"No of search elements = {len(property_details)}")
         print(*property_details)
-        print(*list_of_property_info)
+        
+        #print(*list_of_property_info)
            
     #works filter_elements = self.driver.find_elements(By.XPATH,"//div[contains(@data-test,'mustHave')]")
     #works filter_elements = self.driver.find_elements(By.XPATH, "//div[@data-test='garden-mustHave']")
@@ -202,17 +187,18 @@ class ScrapeWebsite:
                 element.click()
         time.sleep(1)
 
+    
     def accept_element_using_contains(self, 
                                     tagname : str,
-                                    element_attribute :str, 
-                                    element_value :str,
+                                    tag_attribute :str, 
+                                    tag_value :str,
                                     required_value : str):
     
-        find_element_arg = '//'+tagname+'[contains(@' + element_attribute+',' + "'"+element_value + "'"+ ')]'
-        accept_element = self.driver.find_element(By.XPATH, find_element_arg)
-        print(accept_element)
+        find_element_arg = '//'+tagname+'[contains(@' + tag_attribute+',' + "'"+tag_value + "'"+ ')]'
+        found_element = self.driver.find_element(By.XPATH, find_element_arg)
+        print(found_element)
         if required_value.lower() == 'on' :
-            accept_element.click()
+            found_element.click()
         time.sleep(3)
         
         #Other tries that did not work
