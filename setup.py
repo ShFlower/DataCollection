@@ -9,5 +9,6 @@ setup(name='HomeTrends',
         'ipykernel',
         'pandas',
         'nltk',
+        're',
         'Fraction'
        ])

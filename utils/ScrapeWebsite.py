@@ -3,12 +3,14 @@ from webdriver_manager.chrome import ChromeDriverManager
 import time
 import nltk
 import pandas as pd
+import re
 #from typing import KeysView
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from fractions import *
 from selenium.common.exceptions import NoSuchElementException
+
 
 
 #custom methods or libraries
@@ -34,13 +36,16 @@ class ScrapeWebsite:
         self.driver.get(site_url)
         time.sleep(2)
 
+        self.property_info ={} #defines dictionary
+        self.list_of_property_info=[] #defines list of dictionary
+
     def sleep(self, sleeptime :int):
         time.sleep(sleeptime)
 
     #specify the xpath syntax given tagname,attribute and vlaue of web element
     # if using this method to deine a list item, then enter the list_item number e.g li[1]
-    def find_tag_xpath(self, tagname :str, tag_attribute :str, tag_value :str, list_item :str, display_label :str):
-             
+    def find_element_xpath(self, tagname :str, tag_attribute :str, tag_value :str, list_item :str, display_label :str):
+          
         if len(list_item) > 0:
             node_xpath = (f"""//{tagname}[@{tag_attribute}="{tag_value}"]/{list_item}""")
         if len(display_label) > 0:
@@ -50,20 +55,67 @@ class ScrapeWebsite:
         return(node_xpath)
         time.sleep(2)
 
-   
+    def find_relative_element_xpath_using_contains(self, 
+                                tagname : str,
+                                tag_attribute :str, 
+                                tag_value :str,
+                                required_value : str):
+
+        #find_element_arg = '//'+tagname+'[contains(@' + tag_attribute+',' + "'"+tag_value + "'"+ ')]'
+        find_element_arg = (f"""//{tagname}[contains(@{tag_attribute},"{tag_value}")]""")
+        #find_element_arg = '//'
+        print(find_element_arg)
+        try:
+            found_element = self.driver.find_element(By.XPATH, find_element_arg)
+            return(found_element)
+        except NoSuchElementException: 
+            print('No elements found')
+        
+
+    def find_absolute_element_xpath_using_contains(self, 
+                                tagname : str,
+                                tag_attribute :str, 
+                                tag_value :str,
+                                required_value : str):
+
+        find_element_arg = '/'+tagname+'[contains(@' + tag_attribute+',' + "'"+tag_value + "'"+ ')]'
+        return(find_element_arg)
+        
+
+    def find_list_of_elements_using_contains(self, 
+                                            tagname : str,
+                                            tag_attribute :str, 
+                                            tag_value :str,
+                                            required_value : str):
+
+        find_element_arg = '/'+tagname+'[contains(@' + tag_attribute+',' + "'"+tag_value + "'"+ ')]'
+        found_elements=[]
+        try:
+            found_elements = self.driver.find_elements(By.XPATH, find_element_arg)
+        except NoSuchElementException: 
+            print('No elements found')
+        return(found_elements)
+
     def accept_element (self, user_selection_xpath :str):
         # find the xpath element first       
         accept_element_selection = self.driver.find_element(By.XPATH, user_selection_xpath)
         accept_element_selection.click()
         time.sleep(1)
 
-    def select_element_from_list_of_elements (self, list_of_elements :str, select_criteria :list):
+    def select_element_from_list_of_elements (self, list_of_elements :str, dict_entry :list):
         for element in list_of_elements:
             #print(element.text)
             if element.text in select_criteria:
                 print(element.text)
                 element.click()
         time.sleep(5)
+    
+    def find_element_using_span(self, tagname :str, attribute :str, value :str):
+        find_element_arg = '//'+tagname+'[contains(@' + attribute+',' + "'"+value + "'"+ ')]/span'
+        print(find_element_arg)
+        found_element = self.driver.find_elements(By.XPATH,find_element_arg) 
+        return(found_element)
+
 
     def find_list_of_elements_using_span(self, tagname :str, attribute :str, value :str):
         #this does not differentiate between the must have and dont show lists which all get picked up together here
@@ -84,7 +136,7 @@ class ScrapeWebsite:
 
     def scroll_results_pages(self, tagname :str, element_attribute :str, element_name :str, control_label :str):
         
-        pagination_button = self.find_tag_xpath(tagname=tagname, 
+        pagination_button = self.find_element_xpath(tagname=tagname, 
                                 tag_attribute=element_attribute, 
                                 tag_value=element_name, 
                                 list_item='', 
@@ -104,70 +156,110 @@ class ScrapeWebsite:
              
         except NoSuchElementException: 
             print('No elements found')
-            
-    def check_tag_is_valid_search_item(self,result_xpath :str, test_string :str):
-        #check if div tags relate to banners
-        try: 
-            result_xpath.test_string 
-            return(True)
-        except NoSuchElementException:
-            print(f"Did not find element : result is {result_xpath.test_string}")  
-            return(False)
 
-    def find_element_xpath_using_contains(self, 
-                                        tagname : str,
-                                        tag_attribute :str, 
-                                        tag_value :str,
-                                        required_value : str):
+    '''property_address_xpath = property.find_element(By.XPATH,find_relative_element_xpath_using_contains(tagname = 'h1',
+                                                                                        tag_attribute ='itemprop', 
+                                                                                        tag_value = 'streetAddress',
+                                                                                        required_value =''))
+            #print(property_address_xpath)'''        
+
+    def extract_property_details(self, search_urls :list):
+
+        for property_url in search_urls:
         
-            find_element_arg = '//'+tagname+'[contains(@' + tag_attribute+',' + "'"+tag_value + "'"+ ')]'
-            found_element = self.driver.find_element(By.XPATH, find_element_arg)
-            print(found_element)
-
-    def find_elements_in_search_listing(self, 
-                                        search_container_xpath :str, 
-                                        search_container_child_tag : str,
-                                        page_control_tagname :str, 
-                                        page_control_element_attribute :str, 
-                                        page_control_element_name :str, 
-                                        page_control_label :str):
+            self.driver.get(property_url)
+            property_address=self.driver.find_element(By.XPATH,value='//h1[@itemprop="streetAddress"]').text
+            print(property_address)
+            property_country=self.driver.find_element(By.XPATH,'//meta[@itemprop="addressCountry"]').get_attribute('content')
+            print(property_country)
+            property_price_xpath = self.find_element_xpath(tagname ='button', 
+                                                        tag_attribute = 'aria-label', 
+                                                        tag_value ='Note on property price', 
+                                                        list_item ='', 
+                                                        display_label ='')
+                             
+            property_price = self.driver.find_element(By.XPATH,'//button[@aria-label="Note on property price"]//parent::span//parent::div/span').text
+            print(property_price)
+            property_added =  self.driver.find_element(By.XPATH,'//div[contains(text(),"Added on ")]').text 
+            print(property_added)      
+            #self.driver.quit()
+            time.sleep(1)
+      
+    def find_items_in_search_listing(self, 
+                                    search_container_xpath :str, 
+                                    search_container_child_tag : str,
+                                    page_control_tagname :str, 
+                                    page_control_element_attribute :str, 
+                                    page_control_element_name :str, 
+                                    page_control_label :str):
+        
         search_results=[] # all elements returned by search
-        property_details=[] # list of properties returned in search
-
-        property_info ={} #defines dictionary
-        list_of_property_info=[] #defines list of dictionary
+        property_urls=[] # list of properties urls from serach listing
+        #print(search_container_xpath) - //*[@id="l-searchResults"]/div
+        #print(search_container_child_tag) - ./div
+        
         not_last_page = True
-        property_search_results = self.driver.find_element(By.XPATH, search_container_xpath)
-        #print(property_search_results.text)
+        
         while (not_last_page == True):
 
             #scroll to bottom of search page
             scroll_website(self)
+            property_list = self.driver.find_element(By.XPATH,'//div[@class="l-searchResults"]/div')
+            #print(property_list.text)
 
-            # add all elements on the page to search element list
-            search_results = property_search_results.find_elements(By.XPATH, search_container_child_tag) 
+            search_results = property_list.find_elements(By.XPATH, './div')
             print(len(search_results))
-            
-            for result in search_results: 
-                #print(f"result = {result.text}") 
-                try: 
-                   result_item = result.find_element(By.XPATH, './div')
-                   property_details.append(result_item)
-                   result_item.click()
-                   #property_streetadd = result_item.find_element(By.XPATH,'./h1').text
-                   #print(property_streetadd)
+            #print(*search_results)
+           
+
+            for result in search_results:
+                try: # to test for banners in the search for banners in the search list
+                    result.find_element(By.XPATH,'./div/a')
+                    property_id_label= result.find_element(By.XPATH,'./div/a').get_attribute('id')
+                    print (property_id_label) 
+                    try: # find the property url
+                        property_url = result.find_element(By.XPATH, '//a[@data-test="property-camera-icon"]').get_attribute('href')
+                        print(property_url)
+                    except NoSuchElementException: 
+                        property_url = result.find_element(By.XPATH, '//a[@data-test="property-img"]').get_attribute('href')
+                        print(property_url)
+                    #print(property_url)
+                    property_urls.append(property_url)
                 except NoSuchElementException:
-                    print(f"Did not find element : result is {result.text}")
-                 
+                    print("Did not find element")  
+        
+               
             #check for multiple search pages and pagination controls to collate all search results
             not_last_page = self.scroll_results_pages(tagname = page_control_tagname, 
                                                                 element_attribute = page_control_element_attribute, 
                                                                 element_name = page_control_element_name, 
                                                                 control_label =page_control_label)
-      
-        print(f"No of search elements = {len(property_details)}")
-        print(*property_details)
         
+        print(f"No of search elements = {len(property_urls)}")
+        print(*property_urls)
+        return(property_urls)
+
+    def extract_property_info(self, search_list :list):
+        print(f"No of properties = {len(search_list)}")
+        for item in search_list:
+            print(item)
+            #item.click()
+            #result_item = result.find_element(By.XPATH, './div/a').get_attribute('id')
+            property_id_element = item.find_element(By.XPATH,'/div/a')
+            property_id = property_id_element.get_attribute('id')
+            print(property_id)
+            property_info = {property_id: property_id}
+            
+            #except NoSuchElementException:
+            #print('Did not find element')
+
+
+        #property_ = extract_property_information(property_page=result_item)
+        #list_of_property_info.append(property_info)  
+        #print(*list_of_property_info)'''
+            
+        '''list_of_property_information.append(property_info)  '''
+
         #print(*list_of_property_info)
            
     #works filter_elements = self.driver.find_elements(By.XPATH,"//div[contains(@data-test,'mustHave')]")
