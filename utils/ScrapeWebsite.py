@@ -43,7 +43,7 @@ class ScrapeWebsite:
     def sleep(self, sleeptime :int):
         time.sleep(sleeptime)
 
-    #specify the xpath syntax given tagname,attribute and vlaue of web element
+    #specify the xpath syntax given tagname,attribute and value of web element
     # if using this method to deine a list item, then enter the list_item number e.g li[1]
     def find_element_xpath(self, tagname :str, tag_attribute :str, tag_value :str, list_item :str, display_label :str):
           
@@ -165,26 +165,40 @@ class ScrapeWebsite:
             #print(property_address_xpath)'''        
 
     def extract_property_details(self, search_urls :list):
-
+        idx=1
         for property_url in search_urls:
         
             self.driver.get(property_url)
-            property_address=self.driver.find_element(By.XPATH,value='//h1[@itemprop="streetAddress"]').text
+            print(f"Property # : {idx}")
+            property_address=self.driver.find_element(By.XPATH,value='.//h1[@itemprop="streetAddress"]').text
             print(property_address)
-            property_country=self.driver.find_element(By.XPATH,'//meta[@itemprop="addressCountry"]').get_attribute('content')
+            property_country=self.driver.find_element(By.XPATH,'.//meta[@itemprop="addressCountry"]').get_attribute('content')
             print(property_country)
-            property_price_xpath = self.find_element_xpath(tagname ='button', 
+            '''property_price_xpath = self.find_element_xpath(tagname ='button', 
                                                         tag_attribute = 'aria-label', 
                                                         tag_value ='Note on property price', 
                                                         list_item ='', 
                                                         display_label ='')
-                             
+            print(property_price_xpath)'''                 
             property_price = self.driver.find_element(By.XPATH,'//button[@aria-label="Note on property price"]//parent::span//parent::div/span').text
             print(property_price)
-            property_added =  self.driver.find_element(By.XPATH,'//div[contains(text(),"Added on ")]').text 
-            print(property_added)      
-            #self.driver.quit()
+            try:
+                property_added =  self.driver.find_element(By.XPATH,'//div[contains(text(),"Added on ")]').text 
+                print(property_added)  
+            except NoSuchElementException:
+                try:    
+                    property_reduced =  self.driver.find_element(By.XPATH,'//div[contains(text(),"Reduced on ")]').text 
+                    print(property_reduced)
+                except NoSuchElementException:
+                    try: 
+                        property_yest =  self.driver.find_element(By.XPATH,'//div[contains(text(),"yesterday")]').text 
+                        print(property_yest)
+                    except NoSuchElementException:
+                        property_today =  self.driver.find_element(By.XPATH,'//div[contains(text(),"today")]').text 
+                        print(property_today)
+            
             time.sleep(1)
+            idx += 1
       
     def find_items_in_search_listing(self, 
                                     search_container_xpath :str, 
@@ -200,7 +214,7 @@ class ScrapeWebsite:
         #print(search_container_child_tag) - ./div
         
         not_last_page = True
-        
+        idx=1
         while (not_last_page == True):
 
             #scroll to bottom of search page
@@ -212,57 +226,37 @@ class ScrapeWebsite:
             print(len(search_results))
             #print(*search_results)
            
-
+            
             for result in search_results:
-                try: # to test for banners in the search for banners in the search list
+                try: # to test for banners in the search list
                     result.find_element(By.XPATH,'./div/a')
                     property_id_label= result.find_element(By.XPATH,'./div/a').get_attribute('id')
+                    print(f"Property # : {idx}")
                     print (property_id_label) 
-                    try: # find the property url
-                        property_url = result.find_element(By.XPATH, '//a[@data-test="property-camera-icon"]').get_attribute('href')
+                   
+                    try: # find the property url//a[@href]
+                        property_url = result.find_element(By.XPATH, './/a[contains(@data-test,"property-camera-icon")][position()=1]').get_attribute('href')
                         print(property_url)
-                    except NoSuchElementException: 
-                        property_url = result.find_element(By.XPATH, '//a[@data-test="property-img"]').get_attribute('href')
+                        
+                    except NoSuchElementException:
+                        property_url = result.find_element(By.XPATH, './/a[contains(@data-test,"property-img")][position()=1]').get_attribute("href")
                         print(property_url)
-                    #print(property_url)
                     property_urls.append(property_url)
                 except NoSuchElementException:
                     print("Did not find element")  
-        
-               
+                idx+=1
+             
             #check for multiple search pages and pagination controls to collate all search results
             not_last_page = self.scroll_results_pages(tagname = page_control_tagname, 
                                                                 element_attribute = page_control_element_attribute, 
                                                                 element_name = page_control_element_name, 
                                                                 control_label =page_control_label)
-        
+                
         print(f"No of search elements = {len(property_urls)}")
         print(*property_urls)
         return(property_urls)
 
-    def extract_property_info(self, search_list :list):
-        print(f"No of properties = {len(search_list)}")
-        for item in search_list:
-            print(item)
-            #item.click()
-            #result_item = result.find_element(By.XPATH, './div/a').get_attribute('id')
-            property_id_element = item.find_element(By.XPATH,'/div/a')
-            property_id = property_id_element.get_attribute('id')
-            print(property_id)
-            property_info = {property_id: property_id}
-            
-            #except NoSuchElementException:
-            #print('Did not find element')
-
-
-        #property_ = extract_property_information(property_page=result_item)
-        #list_of_property_info.append(property_info)  
-        #print(*list_of_property_info)'''
-            
-        '''list_of_property_information.append(property_info)  '''
-
-        #print(*list_of_property_info)
-           
+    
     #works filter_elements = self.driver.find_elements(By.XPATH,"//div[contains(@data-test,'mustHave')]")
     #works filter_elements = self.driver.find_elements(By.XPATH, "//div[@data-test='garden-mustHave']")
     def find_filter_elements_using_contains(self, 

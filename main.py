@@ -150,17 +150,17 @@ bot4.set_dropdown_using_select_option(element_attribute='ID',
 
 #4b. extract the list of propert returned by the search
 #//div[@class="l-searchResults/div"]./div
-properties_found=[]
-properties_found_url = bot4.find_items_in_search_listing(search_container_xpath = '//*[@id="l-searchResults"]/div/div', 
+property_urls=[]
+property_urls = bot4.find_items_in_search_listing(search_container_xpath = '//*[@id="l-searchResults"]/div/div', 
                                     search_container_child_tag='./div',
                                     page_control_tagname = 'div', 
                                     page_control_element_attribute ='class', 
                                     page_control_element_name ='pagination-controls', 
                                     page_control_label ='Next')
-print(*properties_found_url)
-print(f" No of property urls found: {len(properties_found_url)}")
+print(*property_urls)
+print(f" No of property urls found: {len(property_urls)}")
                                  
-bot4.extract_property_details(search_urls = properties_found_url)
+bot4.extract_property_details(search_urls = property_urls)
 
 ################ On property detail page - testing only ################
 '''#https://www.rightmove.co.uk/properties/128812670#/?channel=RES_BUY
