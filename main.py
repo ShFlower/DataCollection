@@ -1,15 +1,16 @@
 from  utils.ScrapeWebsite import ScrapeWebsite
-
+~Date : 11 November 2022
 
 if __name__ == '__main__':
     #On RightMove website
  '''   bot = ScrapeWebsite(site_url = 'https://www.rightmove.co.uk/')
 
-    #On Website page 1:
+    ################On Website page 1:################
     # 1a. find cookie button and click accept cookies
     cookies_xpath= bot.find_element_xpath(tagname = 'button', 
                                         tag_attribute = 'class', 
-                                        tag_value = 'optanon-allow-all accept-cookies-button',
+                                        tag_value = 'optanon-allow-all accept-cookies-
+                                        button',
                                         list_item ='',
                                         display_label='')
     print(cookies_xpath)                        
@@ -53,7 +54,7 @@ if __name__ == '__main__':
     print(forsale_xpath)     
     bot.accept_element_containing_text(element_type='button', element_text = 'For Sale', req_dropdown_element_index = 0) 
                            
-# On website page 2 
+############# On website page 2 ################
 # https://www.rightmove.co.uk/property-for-sale/search.html?searchLocation=NW%20(Postcode%20Area)&useLocationIdentifier=true&locationIdentifier=REGION%5E93961&buy=For+sale
     
     #2a. Set the search radius for the location specified  
@@ -98,7 +99,8 @@ if __name__ == '__main__':
                       
     bot.accept_element(findproperty_xpath)
     
-# On website property listings page - Website page 3
+################ On website property listings page - Website page 3 ################
+
 # rightmove.co.uk/property-for-sale/find.html?searchType=SALE&locationIdentifier=REGION%5E93961&insId=1&radius=0.25&minPrice=50000&maxPrice=1000000&minBedrooms=1&maxBedrooms=3&displayPropertyType=houses&maxDaysSinceAdded=7&_includeSSTC=on&sortByPriceDescending=&primaryDisplayPropertyType=&secondaryDisplayPropertyType=&oldDisplayPropertyType=&oldPrimaryDisplayPropertyType=&newHome=&auction=false
     #bot3 = ScrapeWebsite(site_url = 'https://www.rightmove.co.uk/property-for-sale/find.html?searchType=SALE&locationIdentifier=REGION%5E93961&insId=1&radius=0.25&minPrice=50000&maxPrice=1000000&minBedrooms=1&maxBedrooms=3&displayPropertyType=houses&maxDaysSinceAdded=7&_includeSSTC=on&sortByPriceDescending=&primaryDisplayPropertyType=&secondaryDisplayPropertyType=&oldDisplayPropertyType=&oldPrimaryDisplayPropertyType=&newHome=&auction=false')
     #3a. select the filter option on the right of the black secondary menu bar along the top of page  
@@ -133,7 +135,7 @@ if __name__ == '__main__':
     bot.accept_element(done_xpath)
     bot.sleep(2) '''
 
-# On website property listings returned page after filters are applied - Website page 4
+################ On website property listings returned page after filters are applied - Website page 4 ################
   
     
 #https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E93961&maxBedrooms=3&minBedrooms=1&maxPrice=1000000&minPrice=50000&radius=0.25&propertyTypes=detached%2Csemi-detached%2Cterraced&maxDaysSinceAdded=7&includeSSTC=false&mustHave=garden%2Cparking&dontShow=retirement%2CsharedOwnership&furnishTypes=&keywords=
@@ -160,7 +162,7 @@ print(f" No of property urls found: {len(properties_found_url)}")
                                  
 bot4.extract_property_details(search_urls = properties_found_url)
 
-
+################ On property detail page - testing only ################
 '''#https://www.rightmove.co.uk/properties/128812670#/?channel=RES_BUY
 bot5 = ScrapeWebsite(site_url = 'https://www.rightmove.co.uk/properties/128812670#/?channel=RES_BUY')
 
